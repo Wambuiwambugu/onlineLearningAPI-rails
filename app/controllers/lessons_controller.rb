@@ -1,5 +1,6 @@
 class LessonsController < ApplicationController
     before_action :set_course
+    before_action :set_lesson, only: [:show, :update, :destroy]
 
     def index
         lessons = if user_enrolled?
@@ -24,6 +25,11 @@ class LessonsController < ApplicationController
           render json: { error: lesson.errors.full_messages.join(', ') }, status: :unprocessable_entity
         end
     end
+
+    def destroy
+        @lesson.destroy
+        render json: { message: 'Lesson deleted successfully' }, status: :ok
+      end
     
     private
     
@@ -37,5 +43,8 @@ class LessonsController < ApplicationController
     
     def lesson_params
         params.require(:lesson).permit(:title, :content, :video_link)
+    end
+    def set_lesson
+        @lesson = @course.lessons.find(params[:id])
     end
 end
