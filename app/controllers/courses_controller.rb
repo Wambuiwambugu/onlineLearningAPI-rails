@@ -13,13 +13,13 @@ class CoursesController < ApplicationController
 
     def show
         course = Course.find(params[:id])
-        render json: course, status: :ok
+        render json: course,serializer: CourseSerializer, status: :ok
     end
 
     def create
         course = Course.new(course_params)
         if course.save
-          render json: course, status: :created
+          render json: course, status: :created, serializer: CourseSerializer
         else
           render json: { errors: course.errors.full_messages }, status: :unprocessable_entity
         end
