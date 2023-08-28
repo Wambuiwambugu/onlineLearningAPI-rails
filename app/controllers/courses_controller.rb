@@ -1,7 +1,9 @@
 class CoursesController < ApplicationController
+   
     before_action :authorized, except: [:index, :show]
     before_action :authorize_admin_or_teacher, only: [:create, :update, :destroy]
 
+    # Get all courses
     def index
         courses = Course.all
         render json: courses, methods: :image_url, status: :ok
@@ -11,11 +13,13 @@ class CoursesController < ApplicationController
         # )
     end
 
+    # Get specific course
     def show
         course = Course.find(params[:id])
         render json: course,serializer: CourseSerializer, status: :ok
     end
 
+    # Create course
     def create
         course = Course.new(course_params)
         if course.save
@@ -25,6 +29,7 @@ class CoursesController < ApplicationController
         end
     end
 
+    # Update a course
     def update
         course = Course.find(params[:id])
         if course.update(course_params)
@@ -34,10 +39,35 @@ class CoursesController < ApplicationController
         end
     end
     
+    # Delete course
     def destroy
         course = Course.find(params[:id])
         course.destroy
         head :no_content
+    end
+
+    # Enroll a user to a course
+    def enroll
+      course = Course.find(params[:id])
+      
+      if current_user.enrolled_in?(course)
+        render json: { error: 'Already enrolled in this course' }, status: :unprocessable_entity
+      else
+        current_user.enroll_in(course)
+        render json: { message: 'Enrolled successfully' }, status: :ok
+      end
+    end
+
+    # Unenroll user from a course
+    def unenroll
+      course = Course.find(params[:id])
+      
+      if current_user.enrolled_in?(course)
+        current_user.unenroll_from(course)
+        render json: { message: 'Unenrolled successfully' }, status: :ok
+      else
+        render json: { error: 'Not enrolled in this course' }, status: :unprocessable_entity
+      end
     end
     
     private
@@ -45,5 +75,7 @@ class CoursesController < ApplicationController
     def course_params
         params.require(:course).permit(:title, :description, :instructor, :rating, :image)
     end
+
+   
 
 end
