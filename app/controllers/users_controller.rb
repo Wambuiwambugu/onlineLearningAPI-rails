@@ -2,6 +2,8 @@
 
 class UsersController < ApplicationController
     skip_before_action :authorized, only: [:register, :login]
+    skip_before_action :authorize_admin_or_teacher
+
   
     def register
       user = User.create(user_params)
@@ -12,13 +14,13 @@ class UsersController < ApplicationController
             user: {
               id: user.id,
               username: user.username,
-              email: user.email
+              email: user.email,
             },
             access_token: access_token,
             refresh_token: refresh_token
           }, status: :created
       else
-        render json: { error: "Invalid user details" }, status: :unprocessable_entity
+        render json: { error: user.errors.full_messages.join(', ') }, status: :unprocessable_entity
       end
     end
   
@@ -31,7 +33,8 @@ class UsersController < ApplicationController
             user: {
               id: user.id,
               username: user.username,
-              email: user.email
+              email: user.email,
+              role: user.role
             },
             access_token: access_token,
             refresh_token: refresh_token
