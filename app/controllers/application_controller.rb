@@ -2,6 +2,7 @@
 
 class ApplicationController < ActionController::API
     before_action :authorized
+    before_action :authorize_admin_or_teacher
     attr_reader :current_user
     SECRET_KEY = Rails.application.secrets.secret_key_base
     ALGORITHM = 'HS256'.freeze
@@ -45,6 +46,13 @@ class ApplicationController < ActionController::API
       token = encode_token(payload)
       refresh_token = JWT.encode(payload.merge({ exp: 1.week.from_now.to_i }), SECRET_KEY)
       { token: token, refresh_token: refresh_token }
+    end
+
+    def authorize_admin_or_teacher
+      
+      return if current_user && (current_user["role"].downcase == "admin" || current_user["role"].downcase == "teacher")
+  
+      render json: { error: 'Unauthorized' }, status: :unauthorized
     end
   end
   

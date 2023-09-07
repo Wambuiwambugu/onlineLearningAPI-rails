@@ -1,3 +1,3 @@
 class LessonSerializer < ActiveModel::Serializer
-  attributes :id
+  attributes :id, :title, :content, :video_link
 end
