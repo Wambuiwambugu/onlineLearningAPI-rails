@@ -1,6 +1,8 @@
 class LessonsController < ApplicationController
     before_action :set_course
     before_action :set_lesson, only: [:show, :update, :destroy]
+    before_action :authorized, except: [:index, :show]
+    before_action :authorize_admin_or_teacher, only: [:create, :update, :destroy]
 
     def index
         lessons = if user_enrolled?
