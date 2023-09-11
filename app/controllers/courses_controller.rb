@@ -3,14 +3,25 @@ class CoursesController < ApplicationController
     before_action :authorized, except: [:index, :show]
     before_action :authorize_admin_or_teacher, only: [:create, :update, :destroy]
 
+    # Check if enrolled
+    def is_enrolled
+      user = User.find(params[:user_id])
+      course = Course.find(params[:course_id])
+      is_enrolled = user.enrolled_in?(course)
+  
+      render json: { isEnrolled: is_enrolled }
+    end
     # Get all courses
     def index
+      if current_user && current_user["role"].downcase == "teacher"
+        # Show courses created by teachers or admins
+        courses = Course.where(creator_id: current_user.id)
+      else
+        # Show all courses for students or when there is no current user
         courses = Course.all
+      end
         render json: courses, methods: :image_url, status: :ok
-        # render json: courses.as_json(include: :image).merge(image: courses.image.map do |image|
-        #   url_for(image)
-        # end
-        # )
+       
     end
 
     # Get specific course
@@ -21,7 +32,12 @@ class CoursesController < ApplicationController
 
     # Create course
     def create
-        course = Course.new(course_params)
+        # course = Course.new(course_params)
+        course = current_user.created_courses.build(course_params)
+
+        course.rating ||= 0
+        course.instructor ||= current_user.username
+
         if course.save
           render json: course, status: :created, serializer: CourseSerializer
         else
