@@ -3,6 +3,14 @@ class CoursesController < ApplicationController
     before_action :authorized, except: [:index, :show]
     before_action :authorize_admin_or_teacher, only: [:create, :update, :destroy]
 
+    # Check if enrolled
+    def is_enrolled
+      user = User.find(params[:user_id])
+      course = Course.find(params[:course_id])
+      is_enrolled = user.enrolled_in?(course)
+  
+      render json: { isEnrolled: is_enrolled }
+    end
     # Get all courses
     def index
         courses = Course.all
