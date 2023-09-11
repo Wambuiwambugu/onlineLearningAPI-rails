@@ -15,6 +15,7 @@ class UsersController < ApplicationController
               id: user.id,
               username: user.username,
               email: user.email,
+              role: user.role
             },
             access_token: access_token,
             refresh_token: refresh_token
