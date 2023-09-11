@@ -13,7 +13,17 @@ class CoursesController < ApplicationController
     end
     # Get all courses
     def index
+      if current_user
+        if current_user.role == "teacher" || current_user.role == "admin"
+          # Show courses created by teachers or admins
+          courses = Course.where(creator_id: current_user.id)
+        else
+          # Show all courses for students
+          courses = Course.all
+        end
+      else
         courses = Course.all
+      end
         render json: courses, methods: :image_url, status: :ok
         # render json: courses.as_json(include: :image).merge(image: courses.image.map do |image|
         #   url_for(image)
@@ -29,7 +39,8 @@ class CoursesController < ApplicationController
 
     # Create course
     def create
-        course = Course.new(course_params)
+        # course = Course.new(course_params)
+        course = current_user.created_courses.build(course_params)
         if course.save
           render json: course, status: :created, serializer: CourseSerializer
         else

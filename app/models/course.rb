@@ -5,6 +5,8 @@ class Course < ApplicationRecord
     has_many :lessons
     has_many :enrollments
     has_many :users, through: :enrollments
+
+    belongs_to :creator, class_name: 'User', foreign_key: 'creator_id'
     
     validates :title, presence: true
     validates :description, presence: true
