@@ -11,7 +11,7 @@ class LessonsController < ApplicationController
                     @course.lessons.limit(2) # Show only two lessons for unenrolled users
                   end
     
-        render json: lessons
+        render json: {course: @course, lessons: lessons}
     end
 
     def show 
